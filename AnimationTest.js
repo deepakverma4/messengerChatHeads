@@ -47,16 +47,17 @@ export class AnimationTest extends Component {
         });
       },
       onPanResponderGrant: () => {
-        this.state.data.map(({animation}, index) => {
+        this.state.data.slice(0).map(({animation}, index) => {
           animation.extractOffset();
         });
       },
       onPanResponderRelease: () => {
-        this.state.data.map(({animation}, index) => {
+        this.state.data.slice(0).map(({animation}, index) => {
           Animated.spring(animation, {
             toValue: {x: 0, y: 0},
-            useNativeDriver: true,
-          });
+            friction: 20,
+            useNativeDriver: false,
+          }).start();
         });
       },
     });
