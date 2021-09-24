@@ -12,6 +12,7 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
+  Dimensions,
 } from 'react-native';
 // import  from 'react-native-reanimated';
 
@@ -20,7 +21,7 @@ export class AnimationTest extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      buttonAnimation: new Animated.Value(0),
+      animation: new Animated.Value(0),
     };
     this._open = true;
   }
@@ -28,7 +29,7 @@ export class AnimationTest extends Component {
   buttonPress = () => {
     const toValue = this._open ? 1 : 0;
 
-    Animated.timing(this.state.buttonAnimation, {
+    Animated.timing(this.state.animation, {
       toValue,
       duration: 300,
       useNativeDriver: false,
@@ -38,103 +39,43 @@ export class AnimationTest extends Component {
   };
 
   render() {
-    const interpolate = this.state.buttonAnimation.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, 1],
-    });
-    const button1Style = {
-      opacity: interpolate,
-      transform: [
-        {
-          translateY: this.state.buttonAnimation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, -70],
-          }),
-        },
-      ],
-    };
-
-    const button2Style = {
-      opacity: interpolate,
-      transform: [
-        {
-          translateY: this.state.buttonAnimation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, -140],
-          }),
-        },
-      ],
-    };
-
-    const button3Style = {
-      opacity: interpolate,
-      transform: [
-        {
-          translateY: this.state.buttonAnimation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, -210],
-          }),
-        },
-      ],
-    };
-
-    const buttonTextStyle = {
-      opacity: interpolate,
-
-      right: this.state.buttonAnimation.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0, 80],
-      }),
-    };
+    const {width, height} = Dimensions.get('window');
 
     return (
       <SafeAreaView style={styles.container}>
-        <TouchableWithoutFeedback activeOpacity={0.6} onPress={() => {}}>
-          <Animated.View
-            style={[styles.buttonStyle, styles.otherButton, button3Style]}>
-            <Animated.Text
-              style={[
-                {fontSize: 18, color: '#000', position: 'absolute', right: 20},
-                buttonTextStyle,
-              ]}>
-              3 text
-            </Animated.Text>
-            <Text style={[styles.otherTextStyle]}>3</Text>
-          </Animated.View>
-        </TouchableWithoutFeedback>
-
-        <TouchableWithoutFeedback activeOpacity={0.6} onPress={() => {}}>
-          <Animated.View
-            style={[styles.buttonStyle, styles.otherButton, button2Style]}>
-            <Animated.Text
-              style={[
-                {fontSize: 18, color: '#000', position: 'absolute', right: 20},
-                buttonTextStyle,
-              ]}>
-              2 text
-            </Animated.Text>
-            <Text style={[styles.otherTextStyle]}>2</Text>
-          </Animated.View>
-        </TouchableWithoutFeedback>
-        <TouchableWithoutFeedback activeOpacity={0.6} onPress={() => {}}>
-          <Animated.View
-            style={[styles.buttonStyle, styles.otherButton, button1Style]}>
-            <Animated.Text
-              style={[
-                {fontSize: 18, color: '#000', position: 'absolute', right: 20},
-                buttonTextStyle,
-              ]}>
-              1 text
-            </Animated.Text>
-            <Text style={[styles.otherTextStyle]}>1</Text>
-          </Animated.View>
-        </TouchableWithoutFeedback>
-        <TouchableOpacity
-          activeOpacity={0.6}
-          onPress={this.buttonPress}
-          style={[styles.buttonStyle]}>
-          <Text style={[styles.textStyle]}>FAB</Text>
-        </TouchableOpacity>
+        <ScrollView
+          style={styles.container}
+          onScroll={Animated.event([
+            {
+              nativeEvent: {
+                contentOffset: {
+                  x: this.state.animation,
+                },
+              },
+            },
+          ])}
+          scrollEventThrottle={16}
+          horizontal={true}
+          pagingEnabled={true}>
+          <View style={{width, height, backgroundColor: '#007bff'}}>
+            <View style={{flex: 1}}></View>
+            <View style={{flex: 1}}>
+              <Text>screen 1</Text>
+            </View>
+          </View>
+          <View style={{width, height, backgroundColor: '#007bff'}}>
+            <View style={{flex: 1}}></View>
+            <View style={{flex: 1}}>
+              <Text>screen 1</Text>
+            </View>
+          </View>
+          <View style={{width, height, backgroundColor: '#007bff'}}>
+            <View style={{flex: 1}}></View>
+            <View style={{flex: 1}}>
+              <Text>screen 1</Text>
+            </View>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -148,33 +89,5 @@ const styles = StyleSheet.create({
     // flexGrow: 1,
 
     backgroundColor: 'white',
-  },
-
-  buttonStyle: {
-    height: 60,
-    width: 60,
-    borderRadius: 60,
-    backgroundColor: '#007bff',
-    position: 'absolute',
-    right: 12,
-    bottom: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowOpacity: 0.2,
-    shadowOffset: {height: 2, width: 2},
-    shadowRadius: 3,
-    shadowColor: '#333',
-  },
-  otherButton: {
-    backgroundColor: '#fff',
-    alignItems: 'center',
-  },
-  textStyle: {
-    fontSize: 18,
-    color: '#fff',
-  },
-  otherTextStyle: {
-    fontSize: 18,
-    color: '#000',
   },
 });
