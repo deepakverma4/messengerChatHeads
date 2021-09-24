@@ -13,25 +13,25 @@ import {
   TouchableOpacity,
   TextInput,
   Dimensions,
+  KeyboardAvoidingView,
 } from 'react-native';
 // import  from 'react-native-reanimated';
 
-const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 export class AnimationTest extends Component {
   constructor(props) {
     super(props);
     this.state = {
       animation: new Animated.Value(0),
     };
-    this._open = true;
+    // this._open = true;
   }
 
   buttonPress = () => {
-    const toValue = this._open ? 1 : 0;
+    const toValue = this._open ? 0 : 1;
 
     Animated.timing(this.state.animation, {
       toValue,
-      duration: 300,
+      duration: 500,
       useNativeDriver: false,
     }).start();
 
@@ -40,42 +40,95 @@ export class AnimationTest extends Component {
 
   render() {
     const {width, height} = Dimensions.get('window');
+    const widthInterpolate = this.state.animation.interpolate({
+      inputRange: [0, 0.5],
+      outputRange: [100, width - 40],
+      extrapolate: 'clamp',
+    });
+
+    const opacityInterpolate = this.state.animation.interpolate({
+      inputRange: [0, 0.5],
+      outputRange: [0, 1],
+      extrapolate: 'clamp',
+    });
+    const widthStyle = {
+      opacity: opacityInterpolate,
+      width: widthInterpolate,
+    };
+
+    const heightInterpolate = this.state.animation.interpolate({
+      inputRange: [0.7, 1],
+      outputRange: [0, 150],
+      extrapolate: 'clamp',
+    });
+    const inputContainer = {
+      height: heightInterpolate,
+    };
+
+    // const writeAnimation = this.state.animation.interpolate({
+    //   inputRange: [0, 1],
+    //   outputRange: [1, 0],
+    //   extrapolate: 'clamp',
+    // });
+    const writeAnimation = {
+      opacity: this.state.animation.interpolate({
+        inputRange: [0, 1],
+        outputRange: [1, 0],
+        extrapolate: 'clamp',
+      }),
+    };
 
     return (
       <SafeAreaView style={styles.container}>
-        <ScrollView
-          style={styles.container}
-          onScroll={Animated.event([
-            {
-              nativeEvent: {
-                contentOffset: {
-                  x: this.state.animation,
-                },
-              },
-            },
-          ])}
-          scrollEventThrottle={16}
-          horizontal={true}
-          pagingEnabled={true}>
-          <View style={{width, height, backgroundColor: '#007bff'}}>
-            <View style={{flex: 1}}></View>
-            <View style={{flex: 1}}>
-              <Text>screen 1</Text>
-            </View>
-          </View>
-          <View style={{width, height, backgroundColor: '#007bff'}}>
-            <View style={{flex: 1}}></View>
-            <View style={{flex: 1}}>
-              <Text>screen 1</Text>
-            </View>
-          </View>
-          <View style={{width, height, backgroundColor: '#007bff'}}>
-            <View style={{flex: 1}}></View>
-            <View style={{flex: 1}}>
-              <Text>screen 1</Text>
-            </View>
-          </View>
-        </ScrollView>
+        <KeyboardAvoidingView style={styles.container}>
+          <Animated.View style={[styles.editor]}>
+            <Animated.View style={[styles.bar]}>
+              <Animated.View style={[styles.toolBar, widthStyle]}>
+                <Text style={{color: '#fff', padding: 5}}>1</Text>
+                <Text style={{color: '#fff', padding: 5}}>2</Text>
+                <Text style={{color: '#fff', padding: 5}}>3</Text>
+                <Text style={{color: '#fff', padding: 5}}>4</Text>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    flex: 1,
+                    justifyContent: 'flex-end',
+                  }}>
+                  <Text style={{color: '#fff', padding: 5}}>5</Text>
+                  <Text style={{color: '#fff', padding: 5}}>6</Text>
+                  <Text style={{color: '#fff', padding: 5}}>7</Text>
+                </View>
+              </Animated.View>
+
+              <TouchableWithoutFeedback onPress={this.buttonPress}>
+                <Animated.View
+                  style={[
+                    StyleSheet.absoluteFill,
+                    styles.writeStyle,
+                    writeAnimation,
+                  ]}>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 'bold',
+                      padding: 5,
+                      color: '#fff',
+                    }}>
+                    Write
+                  </Text>
+                </Animated.View>
+              </TouchableWithoutFeedback>
+            </Animated.View>
+            <Animated.View style={[inputContainer]}>
+              <TextInput
+                style={{flex: 1, fontSize: 20, padding: 10}}
+                multiline={true}
+                placeholder={'Write something..'}
+              />
+            </Animated.View>
+          </Animated.View>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     );
   }
@@ -89,5 +142,34 @@ const styles = StyleSheet.create({
     // flexGrow: 1,
 
     backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  center: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editor: {
+    shadowColor: '#333',
+    shadowOffset: {height: 2, width: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.2)',
+    borderRadius: 5,
+  },
+  bar: {
+    backgroundColor: '#007bff',
+    height: 50,
+  },
+  toolBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    flex: 1,
+  },
+  writeStyle: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
