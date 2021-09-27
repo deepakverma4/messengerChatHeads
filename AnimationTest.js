@@ -17,118 +17,96 @@ import {
 } from 'react-native';
 // import  from 'react-native-reanimated';
 
+const Heart = ({isLiked, ...props}) => {
+  const unfilledHeart = (
+    <View style={(StyleSheet.absoluteFill, {transform: [{scale: 0.9}]})}>
+      <View
+        style={[
+          styles.heartButton,
+          styles.leftHeart,
+          {
+            backgroundColor: '#f4f4f4',
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.heartButton,
+          styles.rightHeart,
+          {
+            backgroundColor: '#f4f4f4',
+          },
+        ]}
+      />
+    </View>
+  );
+  return (
+    <Animated.View style={styles.heart} {...props}>
+      <View
+        style={[
+          styles.heartButton,
+          styles.leftHeart,
+          {backgroundColor: isLiked ? 'red' : 'transparent'},
+        ]}
+      />
+      <View
+        style={[
+          styles.heartButton,
+          styles.rightHeart,
+          {backgroundColor: isLiked ? 'red' : 'transparent'},
+        ]}
+      />
+      {!isLiked && unfilledHeart}
+    </Animated.View>
+  );
+};
+
 export class AnimationTest extends Component {
   constructor(props) {
     super(props);
     this.state = {
       animation: new Animated.Value(0),
+      isLiked: false,
     };
     // this._open = true;
   }
 
   buttonPress = () => {
-    const toValue = this._open ? 0 : 1;
-
-    Animated.timing(this.state.animation, {
-      toValue,
-      duration: 500,
-      useNativeDriver: false,
-    }).start();
-
-    this._open = !this._open;
+    this.setState(
+      {
+        isLiked: !this.state.isLiked,
+      },
+      () => {
+        if (this.state.isLiked) {
+          Animated.spring(this.state.animation, {
+            toValue: 2,
+            friction: 5,
+            useNativeDriver: true,
+          }).start(() => {
+            this.state.animation.setValue(0);
+          });
+        }
+      },
+    );
   };
 
   render() {
     const {width, height} = Dimensions.get('window');
-    const widthInterpolate = this.state.animation.interpolate({
-      inputRange: [0, 0.5],
-      outputRange: [100, width - 40],
-      extrapolate: 'clamp',
+
+    const scaleInterpolate = this.state.animation.interpolate({
+      inputRange: [0, 1, 2],
+      outputRange: [1, 0.8, 1],
     });
-
-    const opacityInterpolate = this.state.animation.interpolate({
-      inputRange: [0, 0.5],
-      outputRange: [0, 1],
-      extrapolate: 'clamp',
-    });
-    const widthStyle = {
-      opacity: opacityInterpolate,
-      width: widthInterpolate,
-    };
-
-    const heightInterpolate = this.state.animation.interpolate({
-      inputRange: [0.7, 1],
-      outputRange: [0, 150],
-      extrapolate: 'clamp',
-    });
-    const inputContainer = {
-      height: heightInterpolate,
-    };
-
-    // const writeAnimation = this.state.animation.interpolate({
-    //   inputRange: [0, 1],
-    //   outputRange: [1, 0],
-    //   extrapolate: 'clamp',
-    // });
-    const writeAnimation = {
-      opacity: this.state.animation.interpolate({
-        inputRange: [0, 1],
-        outputRange: [1, 0],
-        extrapolate: 'clamp',
-      }),
-    };
-
     return (
       <SafeAreaView style={styles.container}>
-        <KeyboardAvoidingView style={styles.container}>
-          <Animated.View style={[styles.editor]}>
-            <Animated.View style={[styles.bar]}>
-              <Animated.View style={[styles.toolBar, widthStyle]}>
-                <Text style={{color: '#fff', padding: 5}}>1</Text>
-                <Text style={{color: '#fff', padding: 5}}>2</Text>
-                <Text style={{color: '#fff', padding: 5}}>3</Text>
-                <Text style={{color: '#fff', padding: 5}}>4</Text>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    flex: 1,
-                    justifyContent: 'flex-end',
-                  }}>
-                  <Text style={{color: '#fff', padding: 5}}>5</Text>
-                  <Text style={{color: '#fff', padding: 5}}>6</Text>
-                  <Text style={{color: '#fff', padding: 5}}>7</Text>
-                </View>
-              </Animated.View>
-
-              <TouchableWithoutFeedback onPress={this.buttonPress}>
-                <Animated.View
-                  style={[
-                    StyleSheet.absoluteFill,
-                    styles.writeStyle,
-                    writeAnimation,
-                  ]}>
-                  <Text
-                    style={{
-                      fontSize: 20,
-                      fontWeight: 'bold',
-                      padding: 5,
-                      color: '#fff',
-                    }}>
-                    Write
-                  </Text>
-                </Animated.View>
-              </TouchableWithoutFeedback>
-            </Animated.View>
-            <Animated.View style={[inputContainer]}>
-              <TextInput
-                style={{flex: 1, fontSize: 20, padding: 10}}
-                multiline={true}
-                placeholder={'Write something..'}
-              />
-            </Animated.View>
+        <TouchableWithoutFeedback onPress={this.buttonPress}>
+          <Animated.View
+            style={{
+              transform: [{scale: scaleInterpolate}],
+            }}>
+            <Heart isLiked={this.state.isLiked} {...this.props} />
           </Animated.View>
-        </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
       </SafeAreaView>
     );
   }
@@ -145,31 +123,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  center: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  editor: {
-    shadowColor: '#333',
-    shadowOffset: {height: 2, width: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.2)',
-    borderRadius: 5,
-  },
-  bar: {
-    backgroundColor: '#007bff',
+  heart: {
+    position: 'absolute',
     height: 50,
+    width: 50,
   },
-  toolBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    flex: 1,
+  heartButton: {
+    width: 30,
+    height: 45,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+
+    position: 'absolute',
+    top: 0,
   },
-  writeStyle: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  leftHeart: {
+    transform: [
+      {
+        rotate: '-45deg',
+      },
+    ],
+    left: 5,
+  },
+  rightHeart: {
+    transform: [
+      {
+        rotate: '45deg',
+      },
+    ],
+    right: 5,
+  },
+  fillColor: {
+    backgroundColor: 'red',
   },
 });
